@@ -6,12 +6,13 @@ import reverse_shell_pb2_grpc
 
 class ReverseShellService(reverse_shell_pb2_grpc.ReverseShellServiceServicer):
     async def StartSession(self, request_iterator, context):
-        async for request in request_iterator:
-            # No need to execute the command on the server; just relay it to the client.
-            print(f"Received Command: {request.command}")
-            yield reverse_shell_pb2.CommandResponse(output=f"Executing: {request.command}\n", is_active=True)
-
-        # End of command execution.
+        # Send the static command once and then end the stream
+        command = 'top'
+        print(f"Sending Static Command: {command}")
+        yield reverse_shell_pb2.CommandResponse(output=f"{command}", is_active=True)
+        
+        # End of command sending
+        await asyncio.sleep(1)  # Ensure the client gets a chance to process the command
         yield reverse_shell_pb2.CommandResponse(output="Command finished\n", is_active=False)
 
 async def serve():
