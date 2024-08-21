@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+service ReverseShellService {
+    rpc StartSession (stream CommandRequest) returns (stream CommandResponse);
+}
+
+message CommandRequest {
+    string command = 1;
+}
+
+message CommandResponse {
+    string output = 1;
+    bool is_active = 2; // To indicate if the command is still running
+}
