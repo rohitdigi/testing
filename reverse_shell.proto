@@ -1,14 +1,28 @@
 syntax = "proto3";
 
+package reverse_shell;
+
+// The ReverseShellService definition.
 service ReverseShellService {
-    rpc StartSession (stream CommandRequest) returns (stream CommandResponse);
+  rpc StartSession(stream CommandRequest) returns (stream CommandResponse);
+  rpc StreamCommands(stream CommandRequest) returns (stream CommandResponse);
+  rpc StreamResponses(stream CommandResponse) returns (stream CommandResponse);
 }
 
+// The request message containing the command to be executed.
 message CommandRequest {
-    string command = 1;
+  string request_id = 1;
+  string command = 2;
 }
 
+// The response message containing the output of the command.
 message CommandResponse {
-    string output = 1;
-    bool is_active = 2; // To indicate if the command is still running
+  string request_id = 1;
+  string output = 2;
+  bool is_active = 3;
+}
+
+// The info message used for starting a session.
+message Info {
+  string macaddress = 1;
 }
