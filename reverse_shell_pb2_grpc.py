@@ -31,7 +31,8 @@ if _version_not_supported:
 
 
 class ReverseShellServiceStub(object):
-    """Missing associated documentation comment in .proto file."""
+    """The ReverseShellService definition.
+    """
 
     def __init__(self, channel):
         """Constructor.
@@ -40,16 +41,39 @@ class ReverseShellServiceStub(object):
             channel: A grpc.Channel.
         """
         self.StartSession = channel.stream_stream(
-                '/ReverseShellService/StartSession',
+                '/reverse_shell.ReverseShellService/StartSession',
                 request_serializer=reverse__shell__pb2.CommandRequest.SerializeToString,
+                response_deserializer=reverse__shell__pb2.CommandResponse.FromString,
+                _registered_method=True)
+        self.StreamCommands = channel.stream_stream(
+                '/reverse_shell.ReverseShellService/StreamCommands',
+                request_serializer=reverse__shell__pb2.CommandRequest.SerializeToString,
+                response_deserializer=reverse__shell__pb2.CommandResponse.FromString,
+                _registered_method=True)
+        self.StreamResponses = channel.stream_stream(
+                '/reverse_shell.ReverseShellService/StreamResponses',
+                request_serializer=reverse__shell__pb2.CommandResponse.SerializeToString,
                 response_deserializer=reverse__shell__pb2.CommandResponse.FromString,
                 _registered_method=True)
 
 
 class ReverseShellServiceServicer(object):
-    """Missing associated documentation comment in .proto file."""
+    """The ReverseShellService definition.
+    """
 
     def StartSession(self, request_iterator, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def StreamCommands(self, request_iterator, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def StreamResponses(self, request_iterator, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -63,16 +87,27 @@ def add_ReverseShellServiceServicer_to_server(servicer, server):
                     request_deserializer=reverse__shell__pb2.CommandRequest.FromString,
                     response_serializer=reverse__shell__pb2.CommandResponse.SerializeToString,
             ),
+            'StreamCommands': grpc.stream_stream_rpc_method_handler(
+                    servicer.StreamCommands,
+                    request_deserializer=reverse__shell__pb2.CommandRequest.FromString,
+                    response_serializer=reverse__shell__pb2.CommandResponse.SerializeToString,
+            ),
+            'StreamResponses': grpc.stream_stream_rpc_method_handler(
+                    servicer.StreamResponses,
+                    request_deserializer=reverse__shell__pb2.CommandResponse.FromString,
+                    response_serializer=reverse__shell__pb2.CommandResponse.SerializeToString,
+            ),
     }
     generic_handler = grpc.method_handlers_generic_handler(
-            'ReverseShellService', rpc_method_handlers)
+            'reverse_shell.ReverseShellService', rpc_method_handlers)
     server.add_generic_rpc_handlers((generic_handler,))
-    server.add_registered_method_handlers('ReverseShellService', rpc_method_handlers)
+    server.add_registered_method_handlers('reverse_shell.ReverseShellService', rpc_method_handlers)
 
 
  # This class is part of an EXPERIMENTAL API.
 class ReverseShellService(object):
-    """Missing associated documentation comment in .proto file."""
+    """The ReverseShellService definition.
+    """
 
     @staticmethod
     def StartSession(request_iterator,
@@ -88,8 +123,62 @@ class ReverseShellService(object):
         return grpc.experimental.stream_stream(
             request_iterator,
             target,
-            '/ReverseShellService/StartSession',
+            '/reverse_shell.ReverseShellService/StartSession',
             reverse__shell__pb2.CommandRequest.SerializeToString,
+            reverse__shell__pb2.CommandResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def StreamCommands(request_iterator,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.stream_stream(
+            request_iterator,
+            target,
+            '/reverse_shell.ReverseShellService/StreamCommands',
+            reverse__shell__pb2.CommandRequest.SerializeToString,
+            reverse__shell__pb2.CommandResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def StreamResponses(request_iterator,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.stream_stream(
+            request_iterator,
+            target,
+            '/reverse_shell.ReverseShellService/StreamResponses',
+            reverse__shell__pb2.CommandResponse.SerializeToString,
             reverse__shell__pb2.CommandResponse.FromString,
             options,
             channel_credentials,

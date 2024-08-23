@@ -14,17 +14,19 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x13reverse_shell.proto\"!\n\x0e\x43ommandRequest\x12\x0f\n\x07\x63ommand\x18\x01 \x01(\t\"4\n\x0f\x43ommandResponse\x12\x0e\n\x06output\x18\x01 \x01(\t\x12\x11\n\tis_active\x18\x02 \x01(\x08\x32L\n\x13ReverseShellService\x12\x35\n\x0cStartSession\x12\x0f.CommandRequest\x1a\x10.CommandResponse(\x01\x30\x01\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x13reverse_shell.proto\x12\rreverse_shell\"5\n\x0e\x43ommandRequest\x12\x12\n\nrequest_id\x18\x01 \x01(\t\x12\x0f\n\x07\x63ommand\x18\x02 \x01(\t\"H\n\x0f\x43ommandResponse\x12\x12\n\nrequest_id\x18\x01 \x01(\t\x12\x0e\n\x06output\x18\x02 \x01(\t\x12\x11\n\tis_active\x18\x03 \x01(\x08\"\x1a\n\x04Info\x12\x12\n\nmacaddress\x18\x01 \x01(\t2\x94\x02\n\x13ReverseShellService\x12Q\n\x0cStartSession\x12\x1d.reverse_shell.CommandRequest\x1a\x1e.reverse_shell.CommandResponse(\x01\x30\x01\x12S\n\x0eStreamCommands\x12\x1d.reverse_shell.CommandRequest\x1a\x1e.reverse_shell.CommandResponse(\x01\x30\x01\x12U\n\x0fStreamResponses\x12\x1e.reverse_shell.CommandResponse\x1a\x1e.reverse_shell.CommandResponse(\x01\x30\x01\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'reverse_shell_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
-  _globals['_COMMANDREQUEST']._serialized_start=23
-  _globals['_COMMANDREQUEST']._serialized_end=56
-  _globals['_COMMANDRESPONSE']._serialized_start=58
-  _globals['_COMMANDRESPONSE']._serialized_end=110
-  _globals['_REVERSESHELLSERVICE']._serialized_start=112
-  _globals['_REVERSESHELLSERVICE']._serialized_end=188
+  _globals['_COMMANDREQUEST']._serialized_start=38
+  _globals['_COMMANDREQUEST']._serialized_end=91
+  _globals['_COMMANDRESPONSE']._serialized_start=93
+  _globals['_COMMANDRESPONSE']._serialized_end=165
+  _globals['_INFO']._serialized_start=167
+  _globals['_INFO']._serialized_end=193
+  _globals['_REVERSESHELLSERVICE']._serialized_start=196
+  _globals['_REVERSESHELLSERVICE']._serialized_end=472
 # @@protoc_insertion_point(module_scope)
