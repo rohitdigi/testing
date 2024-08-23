@@ -61,7 +61,7 @@ async def command_interface(reverse_shell_service):
                 if request_id in reverse_shell_service.responses:
                     response = reverse_shell_service.responses[request_id]
                     if not response.is_active:
-                        print(f"Command '{command}' completed with output:\n{response.output.strip()}")
+                        # print(f"Command '{command}' completed with output:\n{response.output.strip()}")
                         reverse_shell_service.responses.pop(request_id, None)
                         break
                 await asyncio.sleep(1)
