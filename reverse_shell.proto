@@ -5,7 +5,6 @@ package reverse_shell;
 // The ReverseShellService definition.
 service ReverseShellService {
   rpc StartSession(stream CommandRequest) returns (stream CommandResponse);
-  rpc StreamCommands(stream CommandRequest) returns (stream CommandResponse);
   rpc StreamResponses(stream CommandResponse) returns (stream CommandResponse);
 }
 
@@ -15,14 +14,10 @@ message CommandRequest {
   string command = 2;
 }
 
-// The response message containing the output of the command.
+// The response message containing the output of the command.S
 message CommandResponse {
   string request_id = 1;
   string output = 2;
   bool is_active = 3;
 }
 
-// The info message used for starting a session.
-message Info {
-  string macaddress = 1;
-}
