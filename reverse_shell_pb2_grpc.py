@@ -45,14 +45,19 @@ class ReverseShellServiceStub(object):
                 request_serializer=reverse__shell__pb2.CommandRequest.SerializeToString,
                 response_deserializer=reverse__shell__pb2.CommandResponse.FromString,
                 _registered_method=True)
-        self.StreamCommands = channel.stream_stream(
-                '/reverse_shell.ReverseShellService/StreamCommands',
-                request_serializer=reverse__shell__pb2.CommandRequest.SerializeToString,
-                response_deserializer=reverse__shell__pb2.CommandResponse.FromString,
-                _registered_method=True)
         self.StreamResponses = channel.stream_stream(
                 '/reverse_shell.ReverseShellService/StreamResponses',
                 request_serializer=reverse__shell__pb2.CommandResponse.SerializeToString,
+                response_deserializer=reverse__shell__pb2.CommandResponse.FromString,
+                _registered_method=True)
+        self.AddCommand = channel.unary_unary(
+                '/reverse_shell.ReverseShellService/AddCommand',
+                request_serializer=reverse__shell__pb2.CommandRequest.SerializeToString,
+                response_deserializer=reverse__shell__pb2.Empty.FromString,
+                _registered_method=True)
+        self.GetResponse = channel.unary_stream(
+                '/reverse_shell.ReverseShellService/GetResponse',
+                request_serializer=reverse__shell__pb2.RequestID.SerializeToString,
                 response_deserializer=reverse__shell__pb2.CommandResponse.FromString,
                 _registered_method=True)
 
@@ -67,13 +72,19 @@ class ReverseShellServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def StreamCommands(self, request_iterator, context):
+    def StreamResponses(self, request_iterator, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
-    def StreamResponses(self, request_iterator, context):
+    def AddCommand(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def GetResponse(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -87,14 +98,19 @@ def add_ReverseShellServiceServicer_to_server(servicer, server):
                     request_deserializer=reverse__shell__pb2.CommandRequest.FromString,
                     response_serializer=reverse__shell__pb2.CommandResponse.SerializeToString,
             ),
-            'StreamCommands': grpc.stream_stream_rpc_method_handler(
-                    servicer.StreamCommands,
-                    request_deserializer=reverse__shell__pb2.CommandRequest.FromString,
-                    response_serializer=reverse__shell__pb2.CommandResponse.SerializeToString,
-            ),
             'StreamResponses': grpc.stream_stream_rpc_method_handler(
                     servicer.StreamResponses,
                     request_deserializer=reverse__shell__pb2.CommandResponse.FromString,
+                    response_serializer=reverse__shell__pb2.CommandResponse.SerializeToString,
+            ),
+            'AddCommand': grpc.unary_unary_rpc_method_handler(
+                    servicer.AddCommand,
+                    request_deserializer=reverse__shell__pb2.CommandRequest.FromString,
+                    response_serializer=reverse__shell__pb2.Empty.SerializeToString,
+            ),
+            'GetResponse': grpc.unary_stream_rpc_method_handler(
+                    servicer.GetResponse,
+                    request_deserializer=reverse__shell__pb2.RequestID.FromString,
                     response_serializer=reverse__shell__pb2.CommandResponse.SerializeToString,
             ),
     }
@@ -137,33 +153,6 @@ class ReverseShellService(object):
             _registered_method=True)
 
     @staticmethod
-    def StreamCommands(request_iterator,
-            target,
-            options=(),
-            channel_credentials=None,
-            call_credentials=None,
-            insecure=False,
-            compression=None,
-            wait_for_ready=None,
-            timeout=None,
-            metadata=None):
-        return grpc.experimental.stream_stream(
-            request_iterator,
-            target,
-            '/reverse_shell.ReverseShellService/StreamCommands',
-            reverse__shell__pb2.CommandRequest.SerializeToString,
-            reverse__shell__pb2.CommandResponse.FromString,
-            options,
-            channel_credentials,
-            insecure,
-            call_credentials,
-            compression,
-            wait_for_ready,
-            timeout,
-            metadata,
-            _registered_method=True)
-
-    @staticmethod
     def StreamResponses(request_iterator,
             target,
             options=(),
@@ -179,6 +168,60 @@ class ReverseShellService(object):
             target,
             '/reverse_shell.ReverseShellService/StreamResponses',
             reverse__shell__pb2.CommandResponse.SerializeToString,
+            reverse__shell__pb2.CommandResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def AddCommand(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/reverse_shell.ReverseShellService/AddCommand',
+            reverse__shell__pb2.CommandRequest.SerializeToString,
+            reverse__shell__pb2.Empty.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def GetResponse(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_stream(
+            request,
+            target,
+            '/reverse_shell.ReverseShellService/GetResponse',
+            reverse__shell__pb2.RequestID.SerializeToString,
             reverse__shell__pb2.CommandResponse.FromString,
             options,
             channel_credentials,

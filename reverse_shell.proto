@@ -6,8 +6,11 @@ package reverse_shell;
 service ReverseShellService {
   rpc StartSession(stream CommandRequest) returns (stream CommandResponse);
   rpc StreamResponses(stream CommandResponse) returns (stream CommandResponse);
+  rpc AddCommand (CommandRequest) returns (Empty);
+  rpc GetResponse(RequestID) returns (stream CommandResponse);
 }
 
+message Empty {}
 // The request message containing the command to be executed.
 message CommandRequest {
   string request_id = 1;
@@ -21,3 +24,6 @@ message CommandResponse {
   bool is_active = 3;
 }
 
+message RequestID {
+  string request_id = 1;
+}

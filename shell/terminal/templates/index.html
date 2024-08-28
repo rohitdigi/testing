@@ -1,0 +1,27 @@
+<script>
+    const socket = new WebSocket('ws://' + window.location.host + '/ws/terminal/');
+
+    socket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        appendOutput(data.output);
+    };
+
+    socket.onclose = function(e) {
+        console.error('WebSocket closed unexpectedly');
+    };
+
+    function sendCommand() {
+        const commandInput = document.getElementById('commandInput');
+        const command = commandInput.value;
+
+        if (!command) return;
+
+        commandInput.value = '';
+
+        appendOutput(`> ${command}`);
+
+        socket.send(JSON.stringify({
+            'command': command
+        }));
+    }
+</script>

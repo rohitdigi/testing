@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Reverse Shell Command Interface</title>
+    <script>
+        async function sendCommand() {
+            const command = document.getElementById('command-input').value;
+            const response = await fetch('/execute-command/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ command: command })
+            });
+
+            const data = await response.json();
+            if (data.request_id) {
+                const ws = new WebSocket(`ws://localhost:8000/ws/command-output/${data.request_id}/`);
+                ws.onmessage = function (event) {
+                    const responseData = JSON.parse(event.data);
+                    document.getElementById('output').innerText += responseData.output + "\n";
+                    if (!responseData.is_active) {
+                        ws.close();
+                    }
+                };
+            } else {
+                alert('Failed to execute command: ' + data.error);
+            }
+        }
+    </script>
+</head>
+<body>
+    <h1>Reverse Shell Command Interface</h1>
+    <input type="text" id="command-input" placeholder="Enter command here" />
+    <button onclick="sendCommand()">Execute</button>
+    <pre id="output"></pre>
+</body>
+</html>
