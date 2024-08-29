@@ -16,9 +16,9 @@
         .terminal {
             background-color: #000;
             color: #f8f8f2;
-            max-height: calc(100vh - 20px);
+            height: calc(100vh - 20px);
             overflow-y: auto;
-            white-space: pre-wrap; 
+            white-space: pre-wrap;
             padding: 10px;
         }
         .prompt {
@@ -26,9 +26,8 @@
             margin-right: 5px; 
         }
         .output-line {
-            white-space: pre-wrap; 
+            white-space: pre-wrap;
             margin: 0;
-            margin-top: -10px;
             margin-bottom: 5px;
         }
         .input-container {
@@ -49,10 +48,10 @@
 <body>
     <div class="terminal" id="terminal">
         <p>Welcome to the terminal. Type a command and press Enter:</p>
-    </div>
-    <div class="input-container">
-        <span class="prompt">grpc@hydrakongdms-peppermillreno-usa:~$</span>
-        <input type="text" id="commandInput" name="command" autofocus autocomplete="off">
+        <div class="input-container" id="input-container">
+            <span class="prompt">grpc@hydrakongdms-peppermillreno-usa:~$</span>
+            <input type="text" id="commandInput" name="command" autofocus autocomplete="off">
+        </div>
     </div>
     <script>
         const terminal = document.getElementById('terminal');
@@ -78,14 +77,14 @@
         function displayCommand(command) {
             const p = document.createElement('p');
             p.innerHTML = `<span class="prompt">grpc@hydrakongdms-peppermillreno-usa:~$</span>${command}`;
-            terminal.appendChild(p);
+            terminal.insertBefore(p, document.getElementById('input-container'));
         }
 
         function displayCommandOutput(output) {
             const p = document.createElement('p');
             p.classList.add('output-line');
-            p.innerHTML = output.replace(/\n/g, '<br>'); // Replace newlines with <br>
-            terminal.appendChild(p);
+            p.innerHTML = output.replace(/\n/g, '<br>');
+            terminal.insertBefore(p, document.getElementById('input-container'));
             terminal.scrollTop = terminal.scrollHeight;
         }
 
