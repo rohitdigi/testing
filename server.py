@@ -10,12 +10,12 @@ import re
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', handlers=[logging.StreamHandler()])
 
-# ANSI escape sequence regex pattern
-ANSI_ESCAPE = re.compile(r'\x1b\[([0-9;]*)m')
+# # ANSI escape sequence regex pattern
+# ANSI_ESCAPE = re.compile(r'\x1b\[([0-9;]*)m')
 
-def remove_ansi_escape_sequences(text):
-    """Remove ANSI escape sequences from text."""
-    return ANSI_ESCAPE.sub('', text)
+# def remove_ansi_escape_sequences(text):
+#     """Remove ANSI escape sequences from text."""
+#     return ANSI_ESCAPE.sub('', text)
 
 class ReverseShellService(reverse_shell_pb2_grpc.ReverseShellServiceServicer):
     def __init__(self):
@@ -44,9 +44,8 @@ class ReverseShellService(reverse_shell_pb2_grpc.ReverseShellServiceServicer):
         """Receive and accumulate responses from the client."""
         async for request in request_iterator:
             request_id = request.request_id
-            output = remove_ansi_escape_sequences(request.output)
+            output = request.output
             is_active = request.is_active
-
             if request_id not in self.responses:
                 self.responses[request_id] = reverse_shell_pb2.CommandResponse(
                     request_id=request_id,
@@ -83,7 +82,6 @@ class ReverseShellService(reverse_shell_pb2_grpc.ReverseShellServiceServicer):
             
         while True:
             response = self.responses.get(request.request_id)
-            # print(response.output)
             if response:
                 print(response.output)
                 yield reverse_shell_pb2.CommandResponse(

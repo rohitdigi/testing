@@ -64,6 +64,7 @@
         const inputContainer = document.getElementById('input-container');
         const promptElement = document.querySelector('.prompt');
         let continuousCommandActive = false;
+        let continuousCommandBuffer = '';  // Buffer for continuous command output
         let socket = null;
 
         function initWebSocket() {
@@ -76,16 +77,15 @@
             socket.onmessage = function(event) {
                 const data = JSON.parse(event.data);
                 if (data.output) {
-                    if (continuousCommandActive && data.command === 'top') {
-                        replaceTopOutput(data.output);
+                    if (continuousCommandActive) {
+                        continuousCommandBuffer += data.output;
+                        updateContinuousOutput(continuousCommandBuffer);
                     } else {
                         displayCommandOutput(data.output);
                         showPrompt();  // Show the prompt after the command output is displayed
                     }
                 }
             };
-            
-            
         
             socket.onclose = function() {
                 console.log('WebSocket connection closed.');
@@ -108,66 +108,48 @@
             terminal.scrollTop = terminal.scrollHeight;
         }
     
-        function replaceTopOutput(output) {
-            let topOutput = document.querySelector('.output-line.top');
-            if (!topOutput) {
-                // If there's no existing .top output, create a new one
-                topOutput = document.createElement('p');
-                topOutput.classList.add('output-line', 'top');
-                terminal.insertBefore(topOutput, document.getElementById('input-container'));
+        function updateContinuousOutput(output) {
+            let continuousOutput = document.querySelector('.output-line.continuous');
+            if (!continuousOutput) {
+                continuousOutput = document.createElement('p');
+                continuousOutput.classList.add('output-line', 'continuous');
+                terminal.insertBefore(continuousOutput, document.getElementById('input-container'));
             }
-            // Replace the content of the existing .top output
-            topOutput.innerHTML = output.replace(/\n/g, '<br>');
+            continuousOutput.innerHTML = output.replace(/\n/g, '<br>');
             terminal.scrollTop = terminal.scrollHeight;
         }
-        
     
         function stopContinuousCommand() {
             if (socket.readyState === WebSocket.OPEN) {
                 socket.send(JSON.stringify({ command: "stop" }));  // Send "stop" command to server
                 continuousCommandActive = false;
-                {% comment %} displayCommandOutput("Continuous command stopped."); {% endcomment %}
-                showPrompt();  // Show the prompt after stopping the command
+                displayCommandOutput("Continuous command stopped.");
+                continuousCommandBuffer = '';  // Clear the buffer after stopping
             } else {
                 displayCommandOutput("Unable to send 'stop' command: WebSocket is not connected.");
-                showPrompt();  // Ensure prompt is shown even if unable to send command
             }
+            showPrompt();  // Show the prompt after stopping the command
         }
     
         function handleCtrlC() {
-            hidePrompt();  // Hide the prompt when Ctrl+C is pressed
-            if (socket.readyState === WebSocket.OPEN || socket.readyState === WebSocket.CONNECTING) {
-                socket.close();  // Close the current WebSocket connection
+            if (continuousCommandActive) {
+                stopContinuousCommand();
             }
-            
-            initWebSocket();  // Reinitialize WebSocket connection
-            
-            socket.onopen = function() {
-                console.log('WebSocket reconnected.');
-                socket.send(JSON.stringify({ command: "stop" }));  // Send "stop" command to server
-                displayCommandOutput("WebSocket reconnected. Stop command sent.");
-                continuousCommandActive = false;
-                showPrompt();  // Show the prompt after the command is processed
-            };
         }
     
         commandInput.addEventListener('keydown', function(event) {
             if (event.key === 'Enter') {
                 const command = commandInput.value.trim();
                 if (command !== '') {
-                    
-    
                     displayCommand(command);
                     socket.send(JSON.stringify({ command }));
                     commandInput.value = '';
     
-                    if (command.startsWith('top') || command.startsWith('tail') || command.includes('logs')) {
+                    if (command.startsWith('top') || command.startsWith('tail') || command.includes('logs') || command === 'journalctl -f') {
                         continuousCommandActive = true;
-                        hidePrompt();  // Hide the prompt when a command is submitted
-    
-                    if (continuousCommandActive) {
-                        stopContinuousCommand();
-                    }
+                        hidePrompt();  // Hide the prompt only during continuous commands
+                    } else {
+                        showPrompt();  // Ensure prompt is shown for non-continuous commands
                     }
                 }
             } else if (event.key === 'c' && event.ctrlKey) {
@@ -182,9 +164,11 @@
         }
 
         function showPrompt() {
-            promptElement.classList.remove('hidden');
-            commandInput.classList.remove('hidden');
-            commandInput.focus();  // Ensure the input is focused after showing the prompt
+            if (!continuousCommandActive) {
+                promptElement.classList.remove('hidden');
+                commandInput.classList.remove('hidden');
+                commandInput.focus();  // Ensure the input is focused after showing the prompt
+            }
         }
 
         const observer = new MutationObserver(() => {
