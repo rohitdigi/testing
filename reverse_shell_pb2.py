@@ -14,7 +14,7 @@ _sym_db = _symbol_database.Default()
 
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x13reverse_shell.proto\x12\rreverse_shell\"\x07\n\x05\x45mpty\"5\n\x0e\x43ommandRequest\x12\x12\n\nrequest_id\x18\x01 \x01(\t\x12\x0f\n\x07\x63ommand\x18\x02 \x01(\t\"H\n\x0f\x43ommandResponse\x12\x12\n\nrequest_id\x18\x01 \x01(\t\x12\x0e\n\x06output\x18\x02 \x01(\t\x12\x11\n\tis_active\x18\x03 \x01(\x08\"\x1f\n\tRequestID\x12\x12\n\nrequest_id\x18\x01 \x01(\t2\xcd\x02\n\x13ReverseShellService\x12Q\n\x0cStartSession\x12\x1d.reverse_shell.CommandRequest\x1a\x1e.reverse_shell.CommandResponse(\x01\x30\x01\x12U\n\x0fStreamResponses\x12\x1e.reverse_shell.CommandResponse\x1a\x1e.reverse_shell.CommandResponse(\x01\x30\x01\x12\x41\n\nAddCommand\x12\x1d.reverse_shell.CommandRequest\x1a\x14.reverse_shell.Empty\x12I\n\x0bGetResponse\x12\x18.reverse_shell.RequestID\x1a\x1e.reverse_shell.CommandResponse0\x01\x62\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x13reverse_shell.proto\x12\rreverse_shell\"\x07\n\x05\x45mpty\"!\n\nClientInfo\x12\x13\n\x0bmac_address\x18\x01 \x01(\t\"I\n\x0e\x43ommandRequest\x12\x12\n\nrequest_id\x18\x01 \x01(\t\x12\x0f\n\x07\x63ommand\x18\x02 \x01(\t\x12\x12\n\nmacAddress\x18\x03 \x01(\t\"\\\n\x0f\x43ommandResponse\x12\x12\n\nrequest_id\x18\x01 \x01(\t\x12\x0e\n\x06output\x18\x02 \x01(\t\x12\x11\n\tis_active\x18\x03 \x01(\x08\x12\x12\n\nmacAddress\x18\x04 \x01(\t\"\x1f\n\tRequestID\x12\x12\n\nrequest_id\x18\x01 \x01(\t2\xc6\x02\n\x13ReverseShellService\x12J\n\x0cStartSession\x12\x19.reverse_shell.ClientInfo\x1a\x1d.reverse_shell.CommandRequest0\x01\x12U\n\x0fStreamResponses\x12\x1e.reverse_shell.CommandResponse\x1a\x1e.reverse_shell.CommandResponse(\x01\x30\x01\x12\x41\n\nAddCommand\x12\x1d.reverse_shell.CommandRequest\x1a\x14.reverse_shell.Empty\x12I\n\x0bGetResponse\x12\x18.reverse_shell.RequestID\x1a\x1e.reverse_shell.CommandResponse0\x01\x62\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
@@ -23,12 +23,14 @@ if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
   _globals['_EMPTY']._serialized_start=38
   _globals['_EMPTY']._serialized_end=45
-  _globals['_COMMANDREQUEST']._serialized_start=47
-  _globals['_COMMANDREQUEST']._serialized_end=100
-  _globals['_COMMANDRESPONSE']._serialized_start=102
-  _globals['_COMMANDRESPONSE']._serialized_end=174
-  _globals['_REQUESTID']._serialized_start=176
-  _globals['_REQUESTID']._serialized_end=207
-  _globals['_REVERSESHELLSERVICE']._serialized_start=210
-  _globals['_REVERSESHELLSERVICE']._serialized_end=543
+  _globals['_CLIENTINFO']._serialized_start=47
+  _globals['_CLIENTINFO']._serialized_end=80
+  _globals['_COMMANDREQUEST']._serialized_start=82
+  _globals['_COMMANDREQUEST']._serialized_end=155
+  _globals['_COMMANDRESPONSE']._serialized_start=157
+  _globals['_COMMANDRESPONSE']._serialized_end=249
+  _globals['_REQUESTID']._serialized_start=251
+  _globals['_REQUESTID']._serialized_end=282
+  _globals['_REVERSESHELLSERVICE']._serialized_start=285
+  _globals['_REVERSESHELLSERVICE']._serialized_end=611
 # @@protoc_insertion_point(module_scope)

